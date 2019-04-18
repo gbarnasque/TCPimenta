@@ -1,0 +1,7 @@
+How to run Java in cmd.exe:
+
+1) Go to where you "Main.java" is
+2) Use "javac Main.java"
+3) Use "java Main"
+4) ...
+5) Profit! 
