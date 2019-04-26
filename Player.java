@@ -2,58 +2,39 @@ import java.util.*;
 import java.io.*;
 import javax.swing.*; // Biblioteca do Swing para interfaces gráficas
 import java.awt.event.*;
-import javax.sound.sampled.*;
 
+import javax.sound.midi.*;
 
 // https://developer.com/java/other/article.php/2173111/Java-Sound-Playing-Back-Audio-Files-using-Java.htm
+//http://www.music-software-development.com/midi-tutorial.html
 public class Player{
 
-	AudioFormat format;
-	AudioInputStream inputStream;
-	SourceDataLine line;
-
 	public static void main(String[] args) {
-		new Player();
-	}
-
-	public Player(){
+		//new Player(args[0]);
 		try{
-			File file = new File("1-welcome.wav");
-			inputStream = AudioSystem.getAudioInputStream(file);
-			format = inputStream.getFormat();
+			Synthesizer syn = MidiSystem.getSynthesizer();
+			syn.open();
+			MidiChannel[] mc = syn.getChannels();
 
-			DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
-			line = (SourceDataLine) AudioSystem.getLine(info);
-			new PlayThread().start();
+			Instrument[] instr = syn.getDefaultSoundbank().getInstruments();
 
+			syn.loadInstrument(instr[90]);
+
+			JFrame frame = new JFrame("Sound1");                
+			JPanel pane = new JPanel();                         
+			JButton button1 = new JButton("Click me!");            
+			frame.getContentPane().add(pane);                   
+			pane.add(button1);                                     
+			frame.pack();                                       
+			frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+			frame.setVisible(true);                                       
+			button1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {  
+				mc[5].noteOn(60,600);
+			}});
 		}
 		catch(Exception e){
-
+			e.printStackTrace();
 		}
-	}
-
-	class PlayThread extends Thread{
-		byte tempBuffer[] = new byte[10000];
-
-		public void run(){
-			try{
-				line.open(format);
-				line.start();
-
-				int cnt;
-				while((cnt = inputStream.read(tempBuffer,0,tempBuffer.length)) != 1){
-					if(cnt >0){
-						line.write(tempBuffer,0,cnt);
-					}
-				}
-
-
-			}
-			catch(Exception e){
-
-			}
-		}	
-	}
-
+	}	
 }
-
