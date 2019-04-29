@@ -30,6 +30,8 @@ class Player{
 	private int oitava;
 	private int nota;
 
+	private String musica;
+
 	private void showAll(){
 		System.out.println(synthesizer);
 		System.out.println(soundbank);
@@ -68,8 +70,57 @@ class Player{
 			e.printStackTrace();
 		}
 	}
+	public Player(String musica, int bpm, String instrumento){
+		try{
+			synthesizer = MidiSystem.getSynthesizer();
+			soundbank = synthesizer.getDefaultSoundbank();
+			
+			synthesizer.open();
+			midiChannels = synthesizer.getChannels();
+			midiChannel = midiChannels[0];
+
+			instrumentos = soundbank.getInstruments();
+			synthesizer.loadAllInstruments(soundbank);
+			
+			setInstrumento(setInstrumentoIndex(instrumento));
+			System.out.println(instrumento);
+			System.out.println(this.instrumento);
+			System.out.println(instrumentos[this.instrumento]);
+			oitava = OITAVA_INICIAL;
+			this.bpm = bpm;
+			volume = VOLUME_INICIAL;
+			tempo = TEMPO_INICIAL;
+			this.musica = musica;
+			midiChannel.programChange(instrumentos[this.instrumento].getPatch().getProgram());
+			synthesizer.close();
+			playMusic(this.musica);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+	}
 	public static void main(String[] args) {
 		Player player = new Player();
+	}
+
+	private int setInstrumentoIndex(String instrumento){
+		int index;
+		if(instrumento.equals("Piano")){
+			index = 0;
+		}
+		else if(instrumento.equals("Violão")){
+			index = 1;
+		}
+		else if(instrumento.equals("Baixo")){
+			index = 2;
+		}
+		else if(instrumento.equals("Xilofone")){
+			index = 3;
+		}
+		else{
+			index = 0;
+		}
+		return index;
 	}
 
 	public void setInstrumento(int instrumento){
@@ -102,7 +153,7 @@ class Player{
 		}
 	}
 	private void trocaInstrumento(){
-		midiChannel.programChange(instrumentos[instrumento].getPatch().getProgram());
+		midiChannel.programChange(instrumentos[this.instrumento].getPatch().getProgram());
 	}
 
 	public void setBPM(int bpm){
@@ -230,7 +281,7 @@ class Player{
 		setTempo(calculaTempoEntreNotas(contagemDeNotas));
 		try{
 			openSynthesizer();
-			setInstrumento(this.instrumento);
+			setInstrumento(this.instrumentoIndex);
 
 			for(char caracter : notasArray){
 				switch(caracter){
