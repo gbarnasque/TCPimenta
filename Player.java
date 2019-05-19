@@ -83,9 +83,9 @@ class Player{
 			synthesizer.loadAllInstruments(soundbank);
 			
 			setInstrumento(setInstrumentoIndex(instrumento));
-			System.out.println(instrumento);
-			System.out.println(this.instrumento);
-			System.out.println(instrumentos[this.instrumento]);
+			//System.out.println(instrumento);
+			//System.out.println(this.instrumento);
+			//System.out.println(instrumentos[this.instrumento]);
 			oitava = OITAVA_INICIAL;
 			this.bpm = bpm;
 			volume = VOLUME_INICIAL;

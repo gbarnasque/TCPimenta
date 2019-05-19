@@ -34,7 +34,7 @@ public class GUI{
 	private static final int TOCARMUSICA_Y = INSTRUMENTOSBOX_Y + INSTRUMENTOSBOX_HEIGHT + RESPIRO;
 	private static final int TOCARMUSICA_HEIGHT = 24;
 
-	public static void main(String[] args) {
+	public GUI(){
 		JFrame frame=new JFrame("TextToMusic O'Tron9000"); 
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
