@@ -1,5 +1,4 @@
 import javax.swing.*;  
-import java.awt.*;
 import java.awt.event.*;
 
 public class GUI{
@@ -38,7 +37,7 @@ public class GUI{
 		JFrame frame=new JFrame("TextToMusic O'Tron9000"); 
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-		JLabel musicaLabel = new JLabel("Insira sua música aqui:");
+		JLabel musicaLabel = new JLabel("Insira sua mÃºsica aqui:");
 		musicaLabel.setBounds(ALL_X, MUSICALABEL_Y, ALL_WIDTH, LABELS_HEIGHT);
 		JTextArea musicaTexto = new JTextArea();
 		musicaTexto.setBounds(ALL_X, MUSICATEXT_Y, ALL_WIDTH, MUSICATEXT_HEIGHT);
@@ -50,11 +49,11 @@ public class GUI{
 
 		JLabel instrumentoLabel = new JLabel("Selecione seu instrumento:");
 		instrumentoLabel.setBounds(ALL_X, INSTRUMENTOLABEL_Y, ALL_WIDTH, LABELS_HEIGHT);
-		String instrumentos[] = {"Piano","Violão","Baixo","Xilofone"};        
+		String instrumentos[] = {"Piano","ViolÃ£o","Baixo","Xilofone"};        
     	JComboBox<String> instrumentosBox = new JComboBox<String>(instrumentos);    
     	instrumentosBox.setBounds(ALL_X, INSTRUMENTOSBOX_Y, ALL_WIDTH, INSTRUMENTOSBOX_HEIGHT); 
 
-		JButton tocarMusica=new JButton("Tocar Música!");  
+		JButton tocarMusica=new JButton("Tocar MÃºsica!");  
 		tocarMusica.setBounds(TOCARMUSICA_X, TOCARMUSICA_Y, TOCARMUSICA_WIDTH, TOCARMUSICA_HEIGHT);//x axis, y axis, width, height
 
 		frame.add(musicaLabel);
@@ -69,21 +68,22 @@ public class GUI{
 			public void actionPerformed(ActionEvent e){
 				String musica = musicaTexto.getText();
 				if(musica.equals("")){
-					JOptionPane.showMessageDialog(frame, "Entrada de música vazia");
+					JOptionPane.showMessageDialog(frame, "Entrada de mÃºsica vazia");
 				}
 				else{
 					try{
 						int bpm = Integer.parseInt(bpmTexto.getText());
 						if(bpm < 1){
-							JOptionPane.showMessageDialog(frame, "BPM inserido não é um inteiro válido");
+							JOptionPane.showMessageDialog(frame, "BPM inserido nÃ£o Ã© um inteiro vÃ¡lido");
 						}
 						else{
 							String instrumento = instrumentosBox.getSelectedItem().toString();
 							Player player = new Player(musica, bpm, instrumento);
+							player.playMusic();
 						}
 					}
 					catch(NumberFormatException err){
-						JOptionPane.showMessageDialog(frame, "BPM inserido não é um inteiro válido");
+						JOptionPane.showMessageDialog(frame, "BPM inserido nÃ£o Ã© um inteiro vÃ¡lido");
 					}
 				}
 			}
