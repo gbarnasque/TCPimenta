@@ -4,7 +4,7 @@ import javax.sound.midi.*;
 //http://www.music-software-devolopment.com/midi-tutorial.html
 class Player{
 
-	private static final int BPM_INICIAL = 80;
+	private static final int BPM_INICIAL = 120;
 	private static final int TEMPO_INICIAL = 400;
 	private static final int VOLUME_INICIAL = 200;
 	private static final int OITAVA_INICIAL = 0;
@@ -83,9 +83,6 @@ class Player{
 			synthesizer.loadAllInstruments(soundbank);
 			
 			setInstrumento(setInstrumentoIndex(instrumento));
-			//System.out.println(instrumento);
-			//System.out.println(this.instrumento);
-			//System.out.println(instrumentos[this.instrumento]);
 			oitava = OITAVA_INICIAL;
 			this.bpm = bpm;
 			volume = VOLUME_INICIAL;
@@ -93,14 +90,10 @@ class Player{
 			this.musica = musica;
 			midiChannel.programChange(instrumentos[this.instrumento].getPatch().getProgram());
 			synthesizer.close();
-			playMusic(this.musica);
 		}
 		catch(Exception e){
 			e.printStackTrace();
 		}
-	}
-	public static void main(String[] args) {
-		Player player = new Player();
 	}
 
 	private int setInstrumentoIndex(String instrumento){
@@ -108,7 +101,7 @@ class Player{
 		if(instrumento.equals("Piano")){
 			index = 0;
 		}
-		else if(instrumento.equals("Violão")){
+		else if(instrumento.equals("ViolÃ£o")){
 			index = 1;
 		}
 		else if(instrumento.equals("Baixo")){
@@ -129,7 +122,7 @@ class Player{
 			case PIANO: // Piano
 				this.instrumento = 0;
 				break;
-			case VIOLAO: // Violão
+			case VIOLAO: // ViolÃ£o
 				this.instrumento = 25;
 				break;
 			case BAIXO: // Baixo
@@ -146,11 +139,6 @@ class Player{
 	}
 	public Instrument getInstrumento(){
 		return instrumentos[this.instrumento];
-	}
-	public void mostraInstrumentosDisponiveis(){
-		for(Instrument inst : instrumentos){
-			System.out.println(inst);
-		}
 	}
 	private void trocaInstrumento(){
 		midiChannel.programChange(instrumentos[this.instrumento].getPatch().getProgram());
@@ -199,72 +187,56 @@ class Player{
 		this.oitava += 12; // Aumento de oitava no midi
 	}
 	public void diminuiUmaOitava(){
-		this.oitava -= 12; // Diminuição de oitava no midi
+		this.oitava -= 12; // DiminuiÃ§Ã£o de oitava no midi
 	}
+	
 
 	private void setNota(char nota){
 		switch(nota){
-			case 'c': // Dó
+			case 'c': // DÃ³
 					this.nota = 60;
 					break;
-			case 'd': // Ré
+			case 'd': // RÃ©
 					this.nota = 62;
 					break;
 			case 'e': // Mi
 					this.nota = 64;
 					break;
-			case 'f': // Fá
+			case 'f': // FÃ¡
 					this.nota = 65;
 					break;
 			case 'g': // Sol
 					this.nota = 67;
 					break;
-			case 'a': // Lá
+			case 'a': // LÃ¡
 					this.nota = 69;
 					break;
-			case 'b': // Sí
+			case 'b': // SÃ­
 					this.nota = 71;
 					break;
-			case ' ': // Espaço
+			case ' ': // EspaÃ§o
 					this.nota = -1;
 			default:
 		}
 	}
-
-	private void playNote(){
-		midiChannel.noteOn(this.nota+oitava,volume);
-	}
-	public void playNote(char nota){
+	
+	private void playNote(char nota){
 		setNota(nota);
 		midiChannel.noteOn(this.nota+oitava,volume);
 	}
 
-	public void playNotes(String notes){
-		char[] notesArray = notes.toCharArray();
-		openSynthesizer();
-		trocaInstrumento();
-		for(char note : notesArray){
-			playNote(note);
-			try{
-				Thread.sleep(tempo);
-			}
-			catch(Exception e){}
-		}
-		closeSynthesizer();
-	}
-
-	public void openSynthesizer(){
+	private void openSynthesizer(){
 		try{
 			synthesizer.open();
-			Thread.sleep(synthesizer.getLatency()/1000); // Espera a latencia para o synthesizer funcionar normalmente após aberto
+			Thread.sleep(synthesizer.getLatency()/1000); // Espera a latencia para o synthesizer funcionar normalmente apÃ³s aberto
 		}
 		catch(Exception e){
 			e.printStackTrace();
 		}
 	}
-	public void closeSynthesizer(){
+	private void closeSynthesizer(){
 		try{
-			Thread.sleep(1000); // Espera 1000ms=1s para fechar o synthesizer e não terminar a música abruptamente
+			Thread.sleep(1000); // Espera 1000ms=1s para fechar o synthesizer e nÃ£o terminar a mÃºsica abruptamente
 			synthesizer.close();
 		}
 		catch(Exception e){
@@ -272,8 +244,8 @@ class Player{
 		}
 	}
 
-	public void playMusic(String musica){
-		musica = musica.toLowerCase();
+	public void playMusic(){
+		musica = this.musica.toLowerCase();
 		char[] notasArray = musica.toCharArray();
 
 		int contagemDeNotas = contaNotas(notasArray);
@@ -293,14 +265,12 @@ class Player{
 					case 'f':
 					case 'g':
 					case ' ':
-							playNote(caracter);
-							contagemDeNotas--;
-							Thread.sleep(this.tempo); // Espera o tempo entre notas
-							break;
 					case 'o':
 					case 'i':
 					case 'u':
-							playNote();
+							playNote(caracter);
+							contagemDeNotas--;
+							Thread.sleep(this.tempo); // Espera o tempo entre notas
 							break;
 					case '+':
 							setVolume(this.volume*2);
@@ -352,15 +322,18 @@ class Player{
 				case 'f':
 				case 'g':
 				case ' ':
+				case 'o':
+				case 'i':
+				case 'u':
 						contagem++;
 						break;
 				default:
+						break;
 			}
 		}
 		return contagem;
 	}
-	private int calculaTempoEntreNotas(int contagem){
-		return contagem*60*1000/(this.bpm*(contagem-1));
+	private int calculaTempoEntreNotas(int quantidade){
+		return quantidade*60*1000/(this.bpm*(quantidade-1)); // Expressão utilizada para calcular o tempo entre as notas dado bpm da música e quantidade de notas
 	}
 }
-	
