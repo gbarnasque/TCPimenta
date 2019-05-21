@@ -101,7 +101,7 @@ class Player{
 		if(instrumento.equals("Piano")){
 			index = 0;
 		}
-		else if(instrumento.equals("ViolÃ£o")){
+		else if(instrumento.equals("Violão")){
 			index = 1;
 		}
 		else if(instrumento.equals("Baixo")){
@@ -122,7 +122,7 @@ class Player{
 			case PIANO: // Piano
 				this.instrumento = 0;
 				break;
-			case VIOLAO: // ViolÃ£o
+			case VIOLAO: // Violão
 				this.instrumento = 25;
 				break;
 			case BAIXO: // Baixo
@@ -187,34 +187,34 @@ class Player{
 		this.oitava += 12; // Aumento de oitava no midi
 	}
 	public void diminuiUmaOitava(){
-		this.oitava -= 12; // DiminuiÃ§Ã£o de oitava no midi
+		this.oitava -= 12; // Diminuição de oitava no midi
 	}
 	
 
 	private void setNota(char nota){
 		switch(nota){
-			case 'c': // DÃ³
+			case 'c': // Dó
 					this.nota = 60;
 					break;
-			case 'd': // RÃ©
+			case 'd': // Ré
 					this.nota = 62;
 					break;
 			case 'e': // Mi
 					this.nota = 64;
 					break;
-			case 'f': // FÃ¡
+			case 'f': // Fá
 					this.nota = 65;
 					break;
 			case 'g': // Sol
 					this.nota = 67;
 					break;
-			case 'a': // LÃ¡
+			case 'a': // Lá
 					this.nota = 69;
 					break;
-			case 'b': // SÃ­
+			case 'b': // Sí
 					this.nota = 71;
 					break;
-			case ' ': // EspaÃ§o
+			case ' ': // Espaço
 					this.nota = -1;
 			default:
 		}
