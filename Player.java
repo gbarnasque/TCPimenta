@@ -63,7 +63,7 @@ class Player{
 			bpm = BPM_INICIAL;
 			volume = VOLUME_INICIAL;
 			tempo = TEMPO_INICIAL;
-			midiChannel.programChange(instrumentos[instrumento].getPatch().getProgram());
+			trocaInstrumento();
 			synthesizer.close();
 		}
 		catch(Exception e){
@@ -88,7 +88,7 @@ class Player{
 			volume = VOLUME_INICIAL;
 			tempo = TEMPO_INICIAL;
 			this.musica = musica;
-			midiChannel.programChange(instrumentos[this.instrumento].getPatch().getProgram());
+			trocaInstrumento();
 			synthesizer.close();
 		}
 		catch(Exception e){
@@ -99,16 +99,16 @@ class Player{
 	private int setInstrumentoIndex(String instrumento){
 		int index;
 		if(instrumento.equals("Piano")){
-			index = 0;
+			index = PIANO;
 		}
 		else if(instrumento.equals("Violão")){
-			index = 1;
+			index = VIOLAO;
 		}
 		else if(instrumento.equals("Baixo")){
-			index = 2;
+			index = BAIXO;
 		}
 		else if(instrumento.equals("Xilofone")){
-			index = 3;
+			index = XILOFONE;
 		}
 		else{
 			index = 0;
