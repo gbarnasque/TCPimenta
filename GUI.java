@@ -49,7 +49,7 @@ public class GUI{
 
 		JLabel instrumentoLabel = new JLabel("Selecione seu instrumento:");
 		instrumentoLabel.setBounds(ALL_X, INSTRUMENTOLABEL_Y, ALL_WIDTH, LABELS_HEIGHT);
-		String instrumentos[] = {"Piano","Violão","Baixo","Xilofone"};        
+		String instrumentos[] = {"Piano","Violão","Baixo","Xilofone","Harpsichord","Tubular Bells","Pan Flute","Church Organ"};        
     	JComboBox<String> instrumentosBox = new JComboBox<String>(instrumentos);    
     	instrumentosBox.setBounds(ALL_X, INSTRUMENTOSBOX_Y, ALL_WIDTH, INSTRUMENTOSBOX_HEIGHT); 
 
@@ -80,6 +80,7 @@ public class GUI{
 							String instrumento = instrumentosBox.getSelectedItem().toString();
 							Player player = new Player(musica, bpm, instrumento);
 							player.playMusic();
+							//Player player = new Player();
 						}
 					}
 					catch(NumberFormatException err){
