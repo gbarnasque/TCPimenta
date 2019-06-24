@@ -1,6 +1,6 @@
 #!/bin/bash
 
 javac GUI.java
-javac Player.java
+javac PlayerV2.java
 javac Teste.java
 java Teste

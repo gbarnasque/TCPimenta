@@ -52,7 +52,7 @@ public class GUI{
 
 
 	public GUI(){
-		JFrame frame=new JFrame("TextToMusic O'Tron9000"); 
+		JFrame frame=new JFrame("TextToMusic O'Tron9000 V2"); 
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         
@@ -128,8 +128,9 @@ public class GUI{
 						}
 						else{
 							String instrumento = instrumentosBox.getSelectedItem().toString();
-							Player player = new Player(musica, bpm, instrumento);
-							player.playMusic();
+							//Player player = new Player(musica, bpm, instrumento);
+							//player.playMusic();
+							PlayerV2 player = new PlayerV2();
 						}
 					}
 					catch(NumberFormatException err){
