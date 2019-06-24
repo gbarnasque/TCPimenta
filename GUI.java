@@ -163,7 +163,9 @@ public class GUI{
 							if(selecaoUsuario == JFileChooser.APPROVE_OPTION){
 								
 								String name = fileChooser.getName(fileChooser.getSelectedFile()) + ".mid";
+								name = fileChooser.getCurrentDirectory() + "/" + name;
 								File arquivoMidi = new File(name);
+
 								Player player = new Player();
 								if(player.downloadMusic(musica, instrumento, bpm, arquivoMidi)){
 									
