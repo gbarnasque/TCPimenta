@@ -167,7 +167,7 @@ public class GUI{
 								File arquivoMidi = new File(name);
 
 								Player player = new Player();
-								if(player.downloadMusic(musica, instrumento, bpm, arquivoMidi)){
+								if(player.couldDownloadMusic(musica, instrumento, bpm, arquivoMidi)){
 									
 									JOptionPane.showMessageDialog(frame, "Arquivo baixado com sucesso!");
 								}

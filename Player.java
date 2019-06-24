@@ -51,11 +51,6 @@ class Player{
 	private Sequence sequence;
 	private Track track;
 
-	private Soundbank soundbank;
-	private MidiChannel[] midiChannels;
-	private MidiChannel midiChannel;
-	private Instrument[] instrumentos;
-
 	private int instrumentIndex = INITIAL_INSTRUMENT_INDEX;
 	private int instrument = INITIAL_INSTRUMENT;
 	private int bpm = INITIAL_BPM;
@@ -65,13 +60,6 @@ class Player{
 
 	private int note;
 	private int oldNote;
-
-	private String music;
-
-
-	public static void main(String[] args) {
-		PlayerV2 player = new PlayerV2();
-	}
 
 	public Player(){
 	}
@@ -92,19 +80,13 @@ class Player{
 	    }
 	}
 
-	public boolean downloadMusic(String music, String initialInstrument, int bpm, File output){
+	public boolean couldDownloadMusic(String music, String initialInstrument, int bpm, File output){
 		try{
-			sequencer = MidiSystem.getSequencer(); 
-            sequencer.open(); 
             sequence = new Sequence(Sequence.PPQ, TIME_RESOLUTION);
             track = sequence.createTrack();
 			createTrack(music, initialInstrument);
-			sequencer.setSequence(sequence); 
-	        sequencer.setTempoInBPM(bpm);
-
+			
 	        MidiSystem.write(sequence, 0,output);
-
-	        sequencer.close();
 	        return true;
 	    }
 	    catch(Exception e){
@@ -388,119 +370,73 @@ class Player{
 		return event;
 	}
 
+	private void treatNoteCase(char character){
+		setNote(character);
+		setNoteOnTrack();
+		updateTick();
+	}
+
+	private void treatNotNoteCase(char character){
+		updateOldNote();
+		invalidateNote();
+		switch(character){
+			case ' ':
+					setVolume(TWO*getVolume());
+					break;
+			case 'o':
+			case 'O':
+			case 'i':
+			case 'I':
+			case 'u':
+			case 'U':
+					setVolume(getVolume() + (int)(TENPERCENT*getVolume()));
+					break;
+			case '?':
+			case '.':
+					increaseOneOctave();
+					break;
+			case '!':
+					setInstrument(HARPSICHORD);
+					break;
+			case '\n':
+			case '\r':
+					setInstrument(TUBULARBELLS);
+					break;
+			case ';':
+					setInstrument(PANFLUTE);
+					break;
+			case ',':
+					setInstrument(CHURCHORGAN);
+					break;
+			case'0':
+			case'1':
+			case'2':
+			case'3':
+			case'4':
+			case'5':
+			case'6':
+			case'7':
+			case'8':
+			case'9':
+					int offset = Character.getNumericValue(character);
+					setIntrumentWithOffset(offset);
+					break;
+			default:
+					setOldNoteOnTrack();
+					updateTick();
+					break;
+		}
+	}
 
 	public void createTrack(String music, String initialInstrument){
 		char[] musicArray = music.toCharArray();
 		setInstrument(getInstrumentIndex(initialInstrument));
-
-		int countOfNotes = countNotes(musicArray);
 		startTick();
 		for(char character : musicArray){
-			if(isNote(character)){
-				setNote(character);
-				setNoteOnTrack();
-				updateTick();
-			}
-			else{
-				updateOldNote();
-				invalidateNote();
-				switch(character){
-					case ' ':
-							setVolume(TWO*getVolume());
-							break;
-					case 'o':
-					case 'O':
-					case 'i':
-					case 'I':
-					case 'u':
-					case 'U':
-							setVolume(getVolume() + (int)(TENPERCENT*getVolume()));
-							break;
-					case '?':
-					case '.':
-							increaseOneOctave();
-							break;
-					case '!':
-							setInstrument(HARPSICHORD);
-							break;
-					case '\n':
-					case '\r':
-							setInstrument(TUBULARBELLS);
-							break;
-					case ';':
-							setInstrument(PANFLUTE);
-							break;
-					case ',':
-							setInstrument(CHURCHORGAN);
-							break;
-					case'0':
-					case'1':
-					case'2':
-					case'3':
-					case'4':
-					case'5':
-					case'6':
-					case'7':
-					case'8':
-					case'9':
-							int offset = Character.getNumericValue(character);
-							setIntrumentWithOffset(offset);
-							break;
-					default:
-							setOldNoteOnTrack();
-							updateTick();
-							break;
-				}
-			}
-		}		
-	}
-
-	private int countNotes(char[] arr){
-		int count = 0;
-		for(char c : arr){
-			switch(c){
-				case ' ':
-				case 'o':
-				case 'O':
-				case 'i':
-				case 'I':
-				case 'u':
-				case 'U':
-				case '?':
-				case '.':
-				case '!':
-				case '\n':	// New Lines (Windows and Linux)
-				case '\r':
-				case ';':
-				case ',':
-				case'0':
-				case'1':
-				case'2':
-				case'3':
-				case'4':
-				case'5':
-				case'6':
-				case'7':
-				case'8':
-				case'9':
-						invalidateNote();
-						updateOldNote();
-						break;
-				default:
-						if(isNote(c)){
-							count++;
-						}
-						else if(isNote(getOldNote())){
-							count++;
-						}
-						setNote(c);
-						updateOldNote();
-						break;
-			}		
+			if(isNote(character))
+				treatNoteCase(character);
+			else
+				treatNotNoteCase(character);
 		}
-		return count;
 	}
-
-
-
 }
