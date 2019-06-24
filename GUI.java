@@ -128,9 +128,8 @@ public class GUI{
 						}
 						else{
 							String instrumento = instrumentosBox.getSelectedItem().toString();
-							//Player player = new Player(musica, bpm, instrumento);
-							//player.playMusic();
-							PlayerV2 player = new PlayerV2();
+							Player player = new Player();
+							player.playMusic(musica, instrumento, bpm);
 						}
 					}
 					catch(NumberFormatException err){
@@ -154,7 +153,7 @@ public class GUI{
 						}
 						else{
 							String instrumento = instrumentosBox.getSelectedItem().toString();
-							Player player = new Player(musica, bpm, instrumento);
+							Player player = new Player();
 							//player.baixaMusica();
 						}
 					}

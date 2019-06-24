@@ -1,281 +1,275 @@
 import javax.sound.midi.*;
+import java.io.*;
 
 // https://devoloper.com/java/other/article.php/2173111/Java-Sound-Playing-Back-Audio-Files-using-Java.htm
 //http://www.music-software-devolopment.com/midi-tutorial.html
 class Player{
 
-	private static final int BPM_INICIAL = 120;
-	private static final int TEMPO_INICIAL = 400;
-	private static final double VOLUME_INICIAL = 200.0;
-	private static final int OITAVA_INICIAL = 0;
-	private static final int INSTRUMENTO_INICIAL = 0;
-	private static final int INSTRUMENTO_INDEX_INICIAL = 0;
+	private static final int INITIAL_INSTRUMENT_INDEX = 0;
+	private static final int INITIAL_INSTRUMENT = 0;
+	private static final int INITIAL_BPM = 120;
+	private static final int INITIAL_VOLUME = 60;
+	private static final int INITIAL_OCTAVE = 0;
+	private static final int DEFAULT_MIDI_CHANNEL = 0;
+	
+	private static final int DO = 60;
+	private static final int RE = 62;
+	private static final int MI = 64;
+	private static final int FA = 65;
+	private static final int SOL = 67;
+	private static final int LA = 69;
+	private static final int SI = 71;
+	private static final int INVALID_NOTE = 0;
 
 	private static final int PIANO = 0;
-	private static final int VIOLAO = 1;
-	private static final int BAIXO = 2;
-	private static final int XILOFONE = 3;
+	private static final int GUITAR = 1;
+	private static final int BASS = 2;
+	private static final int XILOPHONE = 3;
 	private static final int HARPSICHORD = 4;
 	private static final int TUBULARBELLS = 5;
 	private static final int PANFLUTE = 6;
 	private static final int CHURCHORGAN = 7;
 
-	private static final int DOBRO = 2;
-	private static final double DEZPORCENTO = 0.1;
+	private static final int TWO = 2;
+	private static final double TENPERCENT = 0.1;
 
-	private static final int LIMITESUPERIOROITAVA = 24;
-	private static final int LIMITESUPERIORINSTRUMENTOMIDI = 126;
-	private static final int NOTAINVALIDA = -1;
+	private static final int VOLUME_INFERIOR_LIMIT = 0;
+	private static final int VOLUME_SUPERIOR_LIMIT = 127;
+	private static final int OCTAVE_INFERIOR_LIMIT = -24;
+	private static final int OCTAVE_SUPERIOR_LIMIT = 24;
+	private static final int OCTAVE_OFFSET = 12;
+	private static final int INSTRUMENT_SUPERIOR_LIMIT = 126;
 
-	private Synthesizer synthesizer;
+	private static final int INITIAL_TICK = 1;
+	private static final int TIME_RESOLUTION = 4;
+
+	private static final int NOTEON = 144;
+	private static final int NOTEOFF = 128;
+	private static final int CHANGEINSTRUMENT = 192;
+
+	private Sequencer sequencer;
+	private Sequence sequence;
+	private Track track;
+
 	private Soundbank soundbank;
 	private MidiChannel[] midiChannels;
 	private MidiChannel midiChannel;
 	private Instrument[] instrumentos;
 
-	private int instrumentoIndex;
-	private int instrumento;
-	private int bpm;
-	private int tempo;
-	private double volume;
-	private int oitava;
-	private int nota;
-	private int notaAntiga;
+	private int instrumentIndex = INITIAL_INSTRUMENT_INDEX;
+	private int instrument = INITIAL_INSTRUMENT;
+	private int bpm = INITIAL_BPM;
+	private int volume = INITIAL_VOLUME;
+	private int octave = INITIAL_OCTAVE;
+	private int tick = INITIAL_TICK;
 
-	private String musica;
+	private int note;
+	private int oldNote;
 
-	private void showAll(){
-		System.out.println(synthesizer);
-		System.out.println(soundbank);
-		System.out.println(midiChannel);
+	private String music;
 
-		for(int i =0 ; i<instrumentos.length; i++){
-			System.out.println(instrumentos[i]);
-		}
-		System.out.println(instrumentos[instrumento]);
-		System.out.println(bpm);
-		System.out.println(tempo);
-		System.out.println(volume);
-		System.out.println(oitava);
-		System.out.println(nota);
+
+	public static void main(String[] args) {
+		PlayerV2 player = new PlayerV2();
 	}
 
 	public Player(){
-		try{
-			synthesizer = MidiSystem.getSynthesizer();
-			soundbank = synthesizer.getDefaultSoundbank();
-			
-			synthesizer.open();
-			midiChannels = synthesizer.getChannels();
-			midiChannel = midiChannels[0];
-
-			instrumentos = soundbank.getInstruments();
-			synthesizer.loadAllInstruments(soundbank);
-
-			instrumento = INSTRUMENTO_INICIAL; // Piano
-			instrumentoIndex = INSTRUMENTO_INDEX_INICIAL;
-			oitava = OITAVA_INICIAL;
-			bpm = BPM_INICIAL;
-			volume = VOLUME_INICIAL;
-			tempo = TEMPO_INICIAL;
-			trocaInstrumento();
-			synthesizer.close();
-			this.showAll();
-		}
-		catch(Exception e){
-			e.printStackTrace();
-		}
-	}
-	public Player(String musica, int bpm, String instrumento){
-		try{
-			synthesizer = MidiSystem.getSynthesizer();
-			soundbank = synthesizer.getDefaultSoundbank();
-			
-			synthesizer.open();
-			midiChannels = synthesizer.getChannels();
-			midiChannel = midiChannels[0];
-
-			instrumentos = soundbank.getInstruments();
-			synthesizer.loadAllInstruments(soundbank);
-			
-			
-			oitava = OITAVA_INICIAL;
-			this.bpm = bpm;
-			volume = VOLUME_INICIAL;
-			tempo = TEMPO_INICIAL;
-			this.musica = musica;
-			setInstrumento(setInitialInstrumentoIndex(instrumento));
-			synthesizer.close();
-		}
-		catch(Exception e){
-			e.printStackTrace();
-		}
 	}
 
-	private int setInitialInstrumentoIndex(String instrumento){
-		int index;
-		if(instrumento.equals("Piano")){
-			index = PIANO;
+	public void playMusic(String music, String initialInstrument, int bpm){
+		try{
+			sequencer = MidiSystem.getSequencer(); 
+            sequencer.open(); 
+            sequence = new Sequence(Sequence.PPQ, TIME_RESOLUTION);
+            track = sequence.createTrack();
+			createTrack(music, initialInstrument);
+			sequencer.setSequence(sequence); 
+	        sequencer.setTempoInBPM(bpm);
+	        sequencer.start();
+	    }
+	    catch(Exception e){
+	    	e.printStackTrace();
+	    }
+	}
+
+	private int getInstrumentIndex(String initialInstrument){
+		int instrumentIndex;
+		if(initialInstrument.equals("Piano")){
+			instrumentIndex = PIANO;
 		}
-		else if(instrumento.equals("Violão")){
-			index = VIOLAO;
+		else if(initialInstrument.equals("Violão")){
+			instrumentIndex = GUITAR;
 		}
-		else if(instrumento.equals("Baixo")){
-			index = BAIXO;
+		else if(initialInstrument.equals("Baixo")){
+			instrumentIndex = BASS;
 		}
-		else if(instrumento.equals("Xilofone")){
-			index = XILOFONE;
+		else if(initialInstrument.equals("Xilofone")){
+			instrumentIndex = XILOPHONE;
 		}
-		else if(instrumento.equals("Harpsichord")){
-			index = HARPSICHORD;
+		else if(initialInstrument.equals("Harpsichord")){
+			instrumentIndex = HARPSICHORD;
 		}
-		else if(instrumento.equals("Tubular Bells")){
-			index = TUBULARBELLS;
+		else if(initialInstrument.equals("Tubular Bells")){
+			instrumentIndex = TUBULARBELLS;
 		}
-		else if(instrumento.equals("Pan Flute")){
-			index = PANFLUTE;
+		else if(initialInstrument.equals("Pan Flute")){
+			instrumentIndex = PANFLUTE;
 		}
-		else if(instrumento.equals("Church Organ")){
-			index = CHURCHORGAN;
+		else if(initialInstrument.equals("Church Organ")){
+			instrumentIndex = CHURCHORGAN;
 		}
 		else{
-			index = 0;
+			instrumentIndex = PIANO;
 		}
-		return index;
+		return instrumentIndex;
 	}
 
-	public void setInstrumento(int instrumento){
-		this.instrumentoIndex = instrumento;
-		switch(instrumento){
+	public void setInstrument(int instrument){
+		this.instrumentIndex = instrument;
+		switch(instrument){
 			case PIANO:
-				this.instrumento = 0;
+				this.instrument = 0;
 				break;
-			case VIOLAO:
-				this.instrumento = 25;
+			case GUITAR:
+				this.instrument = 25;
 				break;
-			case BAIXO:
-				this.instrumento = 32;
+			case BASS:
+				this.instrument = 32;
 				break;
-			case XILOFONE:
-				this.instrumento = 13;
+			case XILOPHONE:
+				this.instrument = 13;
 				break;
 			case HARPSICHORD: 
-				this.instrumento = 6;
+				this.instrument = 6;
 				break;
 			case TUBULARBELLS:
-				this.instrumento = 14;
+				this.instrument = 14;
 				break;
 			case PANFLUTE:
-				this.instrumento = 75;
+				this.instrument = 75;
 				break;
 			case CHURCHORGAN:
-				this.instrumento = 19;
+				this.instrument = 19;
 				break;
 			default:
-				this.instrumentoIndex = INSTRUMENTO_INDEX_INICIAL;
-				this.instrumento = INSTRUMENTO_INICIAL;
+				this.instrumentIndex = INITIAL_INSTRUMENT_INDEX;
+				this.instrument = INITIAL_INSTRUMENT;
 				break;
 		}
-		trocaInstrumento();
+		changeInstrument();
 	}
-	private void setIntrumentoBaseadoEmOffset(int offset){
-		this.instrumento = this.instrumento + offset;
-		if(this.instrumento > LIMITESUPERIORINSTRUMENTOMIDI){
-			this.instrumento = 0;
+
+	private boolean isInstrumentValid(int instrument){
+		return (instrument < INSTRUMENT_SUPERIOR_LIMIT);
+	}
+
+	private void setIntrumentWithOffset(int offset){
+		if(isInstrumentValid(this.instrument+offset)){
+			this.instrument = this.instrument+offset;
 		}
-		trocaInstrumento();
+		else{
+			this.instrument = PIANO;
+		}
+		changeInstrument();
 	}
-	public Instrument getInstrumento(){
-		return this.instrumentos[this.instrumento];
+
+	public int getInstrument(){
+		return this.instrument;
 	}
-	private void trocaInstrumento(){
-		midiChannel.programChange(instrumentos[this.instrumento].getPatch().getProgram());
+	private void changeInstrument(){
+		track.add(createEvent(CHANGEINSTRUMENT, getInstrument(), getTick())); 
+	}
+
+	private boolean isBPMValid(int bpm){
+		return (bpm > 0);
 	}
 
 	public void setBPM(int bpm){
-		if(bpm > 0){
-			this.bpm = bpm;
+		if(isBPMValid(bpm)){
+			sequencer.setTempoInBPM(bpm);
 		}
 		else{
-			this.bpm = BPM_INICIAL;
-		}
-	}
-	public int getBPM(){
-		return this.bpm;
-	}
-
-	public void setTempo(int tempo){
-		if(tempo > 0){
-			this.tempo = tempo;
-		}
-		else{
-			this.tempo = TEMPO_INICIAL;
+			sequencer.setTempoInBPM(INITIAL_BPM);
 		}
 	}
 
-	public void setVolume(double vol){
-		if(vol > 0){
-			this.volume = vol;
+	private boolean isVolumeValid(int volume){
+		return (volume > VOLUME_INFERIOR_LIMIT && volume < VOLUME_SUPERIOR_LIMIT);
+	}
+
+	public void setVolume(int volume){
+		if(isVolumeValid(volume)){
+			this.volume = volume;
 		}
 		else{
-			this.volume = VOLUME_INICIAL;
+			this.volume = INITIAL_VOLUME;
 		}
 	}
-	public double getVolume(){
+
+	public int getVolume(){
 		return this.volume;
 	}
 
-	public void setOitava(int oitava){
-		this.oitava = oitava;
+	private boolean isOctaveValid(int octave){
+		return (octave > OCTAVE_INFERIOR_LIMIT && octave < OCTAVE_SUPERIOR_LIMIT);
 	}
-	public int getOitava(){
-		return this.oitava;
-	}
-	public void aumentaUmaOitava(){
-		if(this.oitava <= LIMITESUPERIOROITAVA){
-			this.oitava += 12; // Aumento de oitava no midi
+
+	public void setOctave(int octave){
+		if(isOctaveValid(octave)){
+			this.octave = octave;
 		}
 		else{
-			this.oitava = OITAVA_INICIAL;
+			this.octave = INITIAL_OCTAVE;
 		}
 	}
-	public void diminuiUmaOitava(){
-		this.oitava -= 12; // Diminuição de oitava no midi
-	}
-	
 
-	private void setNota(char nota){
-		switch(nota){
-			case 'C': // Dó
-					this.nota = 60;
+	public int getOctave(){
+		return this.octave;
+	}
+
+	public void increaseOneOctave(){
+		setOctave(getOctave() + OCTAVE_OFFSET);
+	}
+
+	public void decreaseOneOctave(){
+		setOctave(getOctave() - OCTAVE_OFFSET);
+	}
+
+	private void setNote(char note){
+		switch(note){
+			case 'C':
+					this.note = DO;
 					break;
-			case 'D': // Ré
-					this.nota = 62;
+			case 'D':
+					this.note = RE;
 					break;
-			case 'E': // Mi
-					this.nota = 64;
+			case 'E':
+					this.note = MI;
 					break;
-			case 'F': // Fá
-					this.nota = 65;
+			case 'F':
+					this.note = FA;
 					break;
-			case 'G': // Sol
-					this.nota = 67;
+			case 'G':
+					this.note = SOL;
 					break;
-			case 'A': // Lá
-					this.nota = 69;
+			case 'A':
+					this.note = LA;
 					break;
-			case 'B': // Sí
-					this.nota = 71;
+			case 'B':
+					this.note = SI;
 					break;
 			default:
-					this.nota = NOTAINVALIDA;
+					this.note = INVALID_NOTE;
 					break;
 		}
 	}
-	
-	private boolean isNota(char nota){
-		boolean isNota;
-		switch(nota){
+	public int getNote(){
+		return this.note;
+	}
+
+	private boolean isNote(char note){
+		boolean isNote;
+		switch(note){
 			case 'A':
 			case 'B':
 			case 'C':
@@ -283,72 +277,115 @@ class Player{
 			case 'E':
 			case 'F':
 			case 'G':
-					isNota = true;
+					isNote = true;
 					break;
 			default:
-					isNota = false;
+					isNote = false;
 					break;
 		}
-		return isNota;
+		return isNote;
 	}
-	private boolean isNota(int nota){
-		boolean isNota;
-		if(nota != NOTAINVALIDA){
-			isNota = true;
+	private boolean isNote(int note){
+		boolean isNote;
+		if(note != INVALID_NOTE){
+			isNote = true;
 		}
 		else{
-			isNota = false;
+			isNote = false;
 		}
-		return isNota;
-	}
-	private void playNota(char nota){
-		setNota(nota);
-		midiChannel.noteOn(this.nota+oitava,(int)volume);
-	}
-	private void playNotaAntiga(){
-		if(isNota(this.notaAntiga)){
-			midiChannel.noteOn(this.notaAntiga+oitava,(int)volume);
-		}
+		return isNote;
 	}
 
-	private void openSynthesizer(){
-		try{
-			synthesizer.open();
-			Thread.sleep(synthesizer.getLatency()/1000); // Espera a latencia para o synthesizer funcionar normalmente após aberto
-		}
-		catch(Exception e){
-			e.printStackTrace();
-		}
-	}
-	private void closeSynthesizer(){
-		try{
-			Thread.sleep(1000); // Espera 1000ms=1s para fechar o synthesizer e nÃo terminar a música abruptamente
-			synthesizer.close();
-		}
-		catch(Exception e){
-			e.printStackTrace();
-		}
+ 	private void startTick(){
+ 		setTick(INITIAL_TICK);
+ 	}
+
+	public void setTick(int tick){
+		this.tick = tick;
 	}
 
-	public void playMusic(){
-		char[] notasArray = musica.toCharArray();
+	public int getTick(){
+		return this.tick;
+	}
+
+	private void updateTick(){
+		setTick(getTick() + TIME_RESOLUTION);
+	}
+
+	public void setOldNote(int oldNote){
+		this.oldNote = oldNote;
+	}
+
+	public int getOldNote(){
+		return this.oldNote;
+	}
+
+	private void updateOldNote(){
+		setOldNote(getNote());
+	}
+	
+
+	private void invalidateNote(){
+		this.note = INVALID_NOTE;
+	}
+
+	private void setNoteOnTrack(){
+		this.track.add(createEvent(NOTEON, getNote() + getOctave(), getVolume(), getTick())); 
+        this.track.add(createEvent(NOTEOFF, getNote() + getOctave(), getVolume(), getTick() + TWO));  
+	}
+
+	private void setOldNoteOnTrack(){
+		this.track.add(createEvent(NOTEON, getOldNote() + getOctave(), getVolume(), getTick())); 
+        this.track.add(createEvent(NOTEOFF, getOldNote() + getOctave(), getVolume(), getTick() + TWO));  
+	}
+
+	private MidiEvent createEvent(int command, int note, int volume, int tick){
+		MidiEvent event = null;
+		try{
+            ShortMessage message = new ShortMessage(); 
+            message.setMessage(command, DEFAULT_MIDI_CHANNEL, note, volume);
 		
-		setTempo(calculaTempoEntreNotas(contaNotas(notasArray)));
-		try{
-			openSynthesizer();
-			setInstrumento(this.instrumentoIndex);
+            event = new MidiEvent(message, tick);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+		return event;
+	}
 
-			for(char caracter : notasArray){
-				if(isNota(caracter)){
-					playNota(caracter);
-					Thread.sleep(this.tempo); // Espera o tempo entre notas
-				}
-				else{
-					this.notaAntiga = this.nota;
-					this.nota = NOTAINVALIDA;
-					switch(caracter){
+	private MidiEvent createEvent(int command, int instrument, int tick){
+		MidiEvent event = null;
+		try{
+            ShortMessage message = new ShortMessage(); 
+            message.setMessage(command, DEFAULT_MIDI_CHANNEL, instrument, 0);
+		
+            event = new MidiEvent(message, tick);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+		return event;
+	}
+
+
+	public void createTrack(String music, String initialInstrument){
+		char[] musicArray = music.toCharArray();
+		setInstrument(getInstrumentIndex(initialInstrument));
+
+		int countOfNotes = countNotes(musicArray);
+		startTick();
+		for(char character : musicArray){
+			if(isNote(character)){
+				setNote(character);
+				setNoteOnTrack();
+				updateTick();
+			}
+			else{
+				updateOldNote();
+				invalidateNote();
+				switch(character){
 					case ' ':
-							setVolume(DOBRO*this.volume);
+							setVolume(TWO*getVolume());
 							break;
 					case 'o':
 					case 'O':
@@ -356,24 +393,24 @@ class Player{
 					case 'I':
 					case 'u':
 					case 'U':
-							setVolume(this.volume + (DEZPORCENTO*this.volume));
+							setVolume(getVolume() + (int)(TENPERCENT*getVolume()));
 							break;
 					case '?':
 					case '.':
-							aumentaUmaOitava();
+							increaseOneOctave();
 							break;
 					case '!':
-							setInstrumento(HARPSICHORD);
+							setInstrument(HARPSICHORD);
 							break;
-					case '\n':	// Novas linhas (windows e linux)
+					case '\n':
 					case '\r':
-							setInstrumento(TUBULARBELLS);
+							setInstrument(TUBULARBELLS);
 							break;
 					case ';':
-							setInstrumento(PANFLUTE);
+							setInstrument(PANFLUTE);
 							break;
 					case ',':
-							setInstrumento(CHURCHORGAN);
+							setInstrument(CHURCHORGAN);
 							break;
 					case'0':
 					case'1':
@@ -385,24 +422,20 @@ class Player{
 					case'7':
 					case'8':
 					case'9':
-							int offset = Character.getNumericValue(caracter);
-							setIntrumentoBaseadoEmOffset(offset);
+							int offset = Character.getNumericValue(character);
+							setIntrumentWithOffset(offset);
 							break;
 					default:
-							playNotaAntiga();
-							Thread.sleep(this.tempo); // Espera o tempo entre notas
+							setOldNoteOnTrack();
+							updateTick();
 							break;
-					}
 				}
 			}
-			closeSynthesizer();			
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+		}		
 	}
 
-	private int contaNotas(char[] arr){
-		int contagem = 0;
+	private int countNotes(char[] arr){
+		int count = 0;
 		for(char c : arr){
 			switch(c){
 				case ' ':
@@ -415,7 +448,7 @@ class Player{
 				case '?':
 				case '.':
 				case '!':
-				case '\n':	// Novas linhas (windows e linux)
+				case '\n':	// New Lines (Windows and Linux)
 				case '\r':
 				case ';':
 				case ',':
@@ -429,24 +462,24 @@ class Player{
 				case'7':
 				case'8':
 				case'9':
-						this.nota = NOTAINVALIDA;
-						this.notaAntiga = NOTAINVALIDA;
+						invalidateNote();
+						updateOldNote();
 						break;
 				default:
-						if(isNota(c)){
-							contagem++;
+						if(isNote(c)){
+							count++;
 						}
-						else if(isNota(this.notaAntiga)){
-							contagem++;
+						else if(isNote(getOldNote())){
+							count++;
 						}
-						setNota(c);
-						this.notaAntiga = this.nota;
+						setNote(c);
+						updateOldNote();
 						break;
 			}		
 		}
-		return contagem;
+		return count;
 	}
-	private int calculaTempoEntreNotas(int quantidade){
-		return quantidade*60*1000/(this.bpm*(quantidade-1)); // Expressão utilizada para calcular o tempo entre as notas dado bpm da música e quantidade de notas
-	}
+
+
+
 }
