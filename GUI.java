@@ -1,6 +1,7 @@
 import javax.swing.*;  
 import java.awt.event.*;
-import java.io.File; 
+import java.io.File;
+import java.io.FileWriter;
 import java.util.Scanner;
 
 public class GUI{
@@ -153,10 +154,27 @@ public class GUI{
 						}
 						else{
 							String instrumento = instrumentosBox.getSelectedItem().toString();
-							Player player = new Player();
-							//player.baixaMusica();
+							JFileChooser fileChooser = new JFileChooser();
+							fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+							fileChooser.setApproveButtonText("Salvar");
+							fileChooser.setDialogTitle("Escolha o local para baixar a música");   
+							int selecaoUsuario = fileChooser.showSaveDialog(frame);
+							
+							if(selecaoUsuario == JFileChooser.APPROVE_OPTION){
+								
+								String name = fileChooser.getName(fileChooser.getSelectedFile()) + ".mid";
+								File arquivoMidi = new File(name);
+								Player player = new Player();
+								if(player.downloadMusic(musica, instrumento, bpm, arquivoMidi)){
+									
+									JOptionPane.showMessageDialog(frame, "Arquivo baixado com sucesso!");
+								}
+								else
+									JOptionPane.showMessageDialog(frame, "Infelizmente, ocorreu algum erro ao baixar o arquivo.");
+							}
 						}
 					}
+							
 					catch(NumberFormatException err){
 						JOptionPane.showMessageDialog(frame, "BPM inserido não é um inteiro válido (Maior que 0)");
 					}
@@ -185,5 +203,5 @@ public class GUI{
 				}
 			}
 		});
-	}  
+	}
 }

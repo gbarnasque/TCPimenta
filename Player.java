@@ -92,6 +92,27 @@ class Player{
 	    }
 	}
 
+	public boolean downloadMusic(String music, String initialInstrument, int bpm, File output){
+		try{
+			sequencer = MidiSystem.getSequencer(); 
+            sequencer.open(); 
+            sequence = new Sequence(Sequence.PPQ, TIME_RESOLUTION);
+            track = sequence.createTrack();
+			createTrack(music, initialInstrument);
+			sequencer.setSequence(sequence); 
+	        sequencer.setTempoInBPM(bpm);
+
+	        MidiSystem.write(sequence, 0,output);
+
+	        sequencer.close();
+	        return true;
+	    }
+	    catch(Exception e){
+	    	e.printStackTrace();
+	    	return false;
+	    }
+	}
+
 	private int getInstrumentIndex(String initialInstrument){
 		int instrumentIndex;
 		if(initialInstrument.equals("Piano")){
