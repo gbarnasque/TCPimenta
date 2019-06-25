@@ -11,7 +11,7 @@ public enum Instruments{
 
     private int value;
 
-    public Intruments(int value){
+    Instruments(int value){
         this.value = value;
     }
 

@@ -3,6 +3,17 @@ import javax.sound.midi.*;
 import java.io.*;
 
 public class Decoder{
+
+	public static final int TWO = 2;
+	public static final double TENPERCENT = 0.1;
+
+	public static final int INITIAL_TICK = 1;
+	public static final int TIME_RESOLUTION = 4;
+
+	public static final int NOTEON = 144;
+	public static final int NOTEOFF = 128;
+	public static final int CHANGEINSTRUMENT = 192;
+
 	private String musicToDecode;
 	private int[] musicDecoded;
 
@@ -12,16 +23,16 @@ public class Decoder{
 
 	private int instrumentIndex = Initial.INITIAL_INSTRUMENT_INDEX.Value();
 	private int instrument = Initial.INITIAL_INSTRUMENT.Value();
-	private int bpm = MusicConfig.INITIAL_BPM;
+	private int bpm = Initial.INITIAL_BPM.Value();
 	private int volume = Initial.INITIAL_VOLUME.Value();
 	private int octave = Initial.INITIAL_OCTAVE.Value();
-	private int tick = MusicConfig.INITIAL_TICK;
+	private int tick = Initial.INITIAL_TICK.Value();
 
 	private int note;
 	private int oldNote;
 
 	public Decoder() throws InvalidMidiDataException{
-		sequence = new Sequence(Sequence.PPQ, MusicConfig.TIME_RESOLUTION);
+		sequence = new Sequence(Sequence.PPQ, TIME_RESOLUTION);
 		track = sequence.createTrack();
 	}
 
@@ -55,7 +66,7 @@ public class Decoder{
 			this.instrument = 14;
 		}else if (instrument == Instruments.PANFLUTE.Value()){
 			this.instrument = 75;
-		}else if (instrument == Instruments.CHURCHORGAN,Value()){
+		}else if (instrument == Instruments.CHURCHORGAN.Value()){
 			this.instrument = 19;
 		}else{
 			this.instrumentIndex = Initial.INITIAL_INSTRUMENT_INDEX.Value();
@@ -97,7 +108,7 @@ public class Decoder{
 	}
 
 	private void startTick(){
-		setTick(MusicConfig.INITIAL_TICK);
+		setTick(Initial.INITIAL_TICK.Value());
 	}
 
 	public void setTick(int tick){
@@ -109,7 +120,7 @@ public class Decoder{
 	}
 
 	private void updateTick(){
-		setTick(getTick() + MusicConfig.TIME_RESOLUTION);
+		setTick(getTick() + TIME_RESOLUTION);
 	}
 
 	public void setOldNote(int oldNote){
@@ -130,13 +141,13 @@ public class Decoder{
 	}
 
 	private void setNoteOnTrack(){
-		this.track.add(createEvent(MusicConfig.NOTEON, getNote() + getOctave(), getVolume(), getTick()));
-		this.track.add(createEvent(MusicConfig.NOTEOFF, getNote() + getOctave(), getVolume(), getTick() + MusicConfig.TWO));
+		this.track.add(createEvent(NOTEON, getNote() + getOctave(), getVolume(), getTick()));
+		this.track.add(createEvent(NOTEOFF, getNote() + getOctave(), getVolume(), getTick() + TWO));
 	}
 
 	private void setOldNoteOnTrack(){
-		this.track.add(createEvent(MusicConfig.NOTEON, getOldNote() + getOctave(), getVolume(), getTick()));
-		this.track.add(createEvent(MusicConfig.NOTEOFF, getOldNote() + getOctave(), getVolume(), getTick() + MusicConfig.TWO));
+		this.track.add(createEvent(NOTEON, getOldNote() + getOctave(), getVolume(), getTick()));
+		this.track.add(createEvent(NOTEOFF, getOldNote() + getOctave(), getVolume(), getTick() + TWO));
 	}
 
 	private MidiEvent createEvent(int command, int note, int volume, int tick){
@@ -178,7 +189,7 @@ public class Decoder{
 		invalidateNote();
 		switch(character){
 			case ' ':
-				setVolume(MusicConfig.TWO*getVolume());
+				setVolume(TWO*getVolume());
 				break;
 			case 'o':
 			case 'O':
@@ -186,7 +197,7 @@ public class Decoder{
 			case 'I':
 			case 'u':
 			case 'U':
-				setVolume(getVolume() + (int)(MusicConfig.TENPERCENT*getVolume()));
+				setVolume(getVolume() + (int)(TENPERCENT*getVolume()));
 				break;
 			case '?':
 			case '.':
@@ -226,7 +237,7 @@ public class Decoder{
 	}
 
 	private boolean isInstrumentValid(int instrument){
-		return (instrument < MusicConfig.INSTRUMENT_SUPERIOR_LIMIT);
+		return (instrument < Limits.INSTRUMENT_SUPERIOR_LIMIT.Value());
 	}
 
 	private void setIntrumentWithOffset(int offset){
@@ -243,7 +254,7 @@ public class Decoder{
 		return this.instrument;
 	}
 	private void changeInstrument(){
-		track.add(createEvent(MusicConfig.CHANGEINSTRUMENT, getInstrument(), getTick()));
+		track.add(createEvent(CHANGEINSTRUMENT, getInstrument(), getTick()));
 	}
 
 	private boolean isBPMValid(int bpm){
@@ -260,7 +271,7 @@ public class Decoder{
 	}
 
 	private boolean isVolumeValid(int volume){
-		return (volume > MusicConfig.VOLUME_INFERIOR_LIMIT && volume < MusicConfig.VOLUME_SUPERIOR_LIMIT);
+		return (volume > Limits.VOLUME_INFERIOR_LIMIT.Value() && volume < Limits.VOLUME_SUPERIOR_LIMIT.Value());
 	}
 
 	public void setVolume(int volume){
@@ -277,7 +288,7 @@ public class Decoder{
 	}
 
 	private boolean isOctaveValid(int octave){
-		return (octave > MusicConfig.OCTAVE_INFERIOR_LIMIT && octave < MusicConfig.OCTAVE_SUPERIOR_LIMIT);
+		return (octave > Limits.OCTAVE_INFERIOR_LIMIT.Value() && octave < Limits.OCTAVE_SUPERIOR_LIMIT.Value());
 	}
 
 	public void setOctave(int octave){
@@ -294,11 +305,11 @@ public class Decoder{
 	}
 
 	public void increaseOneOctave(){
-		setOctave(getOctave() + MusicConfig.OCTAVE_OFFSET);
+		setOctave(getOctave() + Limits.OCTAVE_OFFSET.Value());
 	}
 
 	public void decreaseOneOctave(){
-		setOctave(getOctave() - MusicConfig.OCTAVE_OFFSET);
+		setOctave(getOctave() - Limits.OCTAVE_OFFSET.Value());
 	}
 
 	private void setNote(char note){

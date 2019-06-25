@@ -4,7 +4,8 @@ public enum Initial {
     INITIAL_BPM(120),
     INITIAL_VOLUME(60),
     INITIAL_OCTAVE(0),
-    DEFAULT_MIDI_CHANNEL(0);
+    DEFAULT_MIDI_CHANNEL(0),
+    INITIAL_TICK(1);
 
     private final int value;
     Initial(int value){ this.value = value; }
